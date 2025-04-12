@@ -49,8 +49,8 @@ jobs:
           -deststorepass changeit \
           -srcstorepass changeit
 
-    - name: Upload Cert Artifact
-      uses: actions/upload-artifact@v3.1.3 # 명시적 버전 지정
-      with:
-        name: kafka-certs
-        path: certs/
+    # - name: Upload Cert Artifact
+    #   uses: actions/upload-artifact@v3.1.3 # 명시적 버전 지정
+    #   with:
+    #     name: kafka-certs
+    #     path: certs/
