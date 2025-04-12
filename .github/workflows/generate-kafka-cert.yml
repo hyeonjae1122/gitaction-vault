@@ -11,7 +11,7 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Install jq, openssl, keytool if not exist
-      run: sudo apt-get update && sudo apt-get install -y jq openssl
+      run: brew update && brew install jq openssl
     - name: Prepare certs directory
       run: mkdir -p certs
 
