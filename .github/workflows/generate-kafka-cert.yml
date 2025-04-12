@@ -1,0 +1,52 @@
+name: Generate Kafka mTLS Certs
+
+on: push
+  
+
+jobs:
+  generate-certs:
+    runs-on: self-hosted
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    - name: Install jq & openssl
+      run: sudo apt-get update && sudo apt-get install -y jq openssl
+
+    - name: Generate Kafka Server Cert from Vault
+      env:
+        VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
+        VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
+      run: |
+        curl --header "X-Vault-Token: $VAULT_TOKEN" \
+             --request POST \
+             --data '{"common_name": "kafka1.kafka.local", "ttl": "72h"}' \
+             $VAULT_ADDR/v1/pki/issue/kafka-server > cert_output.json
+
+        cat cert_output.json | jq -r .data.certificate > certs/kafka-server.crt
+        cat cert_output.json | jq -r .data.private_key > certs/kafka-server.key
+        cat cert_output.json | jq -r .data.issuing_ca > certs/ca.crt
+
+    - name: Convert PEM to PKCS12 and JKS
+      run: |
+        openssl pkcs12 -export \
+          -in certs/kafka-server.crt \
+          -inkey certs/kafka-server.key \
+          -certfile certs/ca.crt \
+          -out certs/kafka-server.p12 \
+          -name kafka-server \
+          -passout pass:changeit
+
+        keytool -importkeystore \
+          -destkeystore certs/kafka-server.jks \
+          -srckeystore certs/kafka-server.p12 \
+          -srcstoretype PKCS12 \
+          -deststorepass changeit \
+          -srcstorepass changeit
+
+    - name: Upload Cert Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: kafka-certs
+        path: certs/
