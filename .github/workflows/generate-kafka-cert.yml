@@ -10,11 +10,8 @@ jobs:
     - name: Checkout repo
       uses: actions/checkout@v3
 
-    - name: Install jq, openssl, keytool (default JDK) if not exist
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y jq openssl default-jdk
-
+    - name: Install jq, openssl, keytool if not exist
+      run: sudo apt-get update && sudo apt-get install -y jq openssl
     - name: Prepare certs directory
       run: mkdir -p certs
 
