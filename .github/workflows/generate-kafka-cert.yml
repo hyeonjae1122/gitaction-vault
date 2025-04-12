@@ -3,7 +3,7 @@ name: Generate Kafka mTLS Certs
 on: push
 
 jobs:
-  generate-certs:
+  build:
     runs-on: self-hosted
 
     steps:
